@@ -12,8 +12,11 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "serve": "vite preview"
+    "serve": "vite preview",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
   },
+  "homepage": "https://parbeen27.github.io/Phaser/",
   "keywords": [],
   "author": "",
   "license": "ISC",

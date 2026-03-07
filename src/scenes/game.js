@@ -4,6 +4,7 @@ export default class GameScene extends Phaser.Scene {
         super('gameScene');
     }
     preload() {
+        this.load.setBaseURL(import.meta.env.BASE_URL);
         console.log("Preloading assets...");
         this.load.atlas(
             "player",
