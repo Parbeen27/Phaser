@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import MenuScene from './scenes/menu.js';
 import GameScene from './scenes/game.js';  
 import GameOverScene from './scenes/gameover.js';
+import WinScene from './scenes/win.js';
 
 const config = {
     type: Phaser.AUTO,
@@ -29,7 +30,7 @@ const config = {
         }
     },
     scene: [MenuScene,
-         GameScene, GameOverScene]
+         GameScene, GameOverScene,WinScene]
 }
 
 const game = new Phaser.Game(config);

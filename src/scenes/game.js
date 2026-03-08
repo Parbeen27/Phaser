@@ -24,6 +24,10 @@ export default class GameScene extends Phaser.Scene {
         this.load.audio("gameOverSound", "/assets/gameover.wav");
         this.load.audio("hitSound", "/assets/hit.mp3");
         this.load.image("bullet","/assets/bullet.png");
+        this.load.image("left","/assets/btnleft.png");
+        this.load.image("right","/assets/btnleft.png");
+        this.load.image("up","/assets/btnup.png");
+        this.load.image("shoot","/assets/shoot.png");
     }
     create() {
         console.log("Creating game scene...");
@@ -160,6 +164,8 @@ export default class GameScene extends Phaser.Scene {
             child.setBounceY(Phaser.Math.FloatBetween(0.2, 0.5));
             child.setScale(.1);
         });
+
+
         //ammo
         this.ammocount = 10;
         this.ammoText = this.add.text(16, 80, 'Ammo: 10', { fontSize: '16px', fill: '#000' }).setScrollFactor(0);
@@ -217,12 +223,14 @@ export default class GameScene extends Phaser.Scene {
         this.ammoDrop = this.physics.add.group({
             key: "bullet",
             maxSize: 10,
-            repeat: 0,
+            active: false,
+            visible: false
         });
         this.gundrop = this.physics.add.group({
             key: "coin",
             maxSize: 5,
-            repeat: 0,
+            active: false,
+            visible: false
         });
         this.physics.add.collider(this.ammoDrop, this.ground);
         this.physics.add.collider(this.ammoDrop, this.platforms);
@@ -255,13 +263,15 @@ export default class GameScene extends Phaser.Scene {
         //healthbar
         this.playerHealth = 100;
         this.playerHealthtext = this.add.text(16, 50, 'Health: 100', { fontSize: '16px', fill: '#000' }).setScrollFactor(0);
-        //this.playerHealth = this.createHealthBar(200,20,100,10,100);
         this.isHit = false;
         // this.physics.add.overlap(this.player, this.enemy.bullets, this.PlayerHit,null,this);
         // this.physics.add.overlap(this.player.bullets, this.enemy, this.enemyHit,null,this);
      //   this.setupCamera();
         //keyboard input
         this.createControls();
+        if(this.sys.game.device.input.touch || window.innerWidth < 900){
+            this.createMobileControls();
+        }
         //sounds
         this.sfx = {
             jump: this.sound.add("jump"),
@@ -297,6 +307,24 @@ export default class GameScene extends Phaser.Scene {
             this.cursors = this.input.keyboard.createCursorKeys();
             this.keys = this.input.keyboard.addKeys("W,A,S,D");
         };
+        createMobileControls(){
+            this.leftpress = false;
+            this.rightpress = false;
+            this.uppress = false;
+            this.shootpress = false;
+            const leftButton = this.add.image(80, this.scale.height - 80, "left").setInteractive().setScrollFactor(0).setScale(.2);
+            const rightButton = this.add.image(160, this.scale.height - 80, "right").setInteractive().setScrollFactor(0).setScale(.2).setFlipX(true);
+            const upButton = this.add.image(this.scale.width - 160, this.scale.height - 80, "up").setInteractive().setScrollFactor(0).setScale(.2);
+            const shootButton = this.add.image(this.scale.width - 80, this.scale.height - 80, "shoot").setInteractive().setScrollFactor(0).setScale(.2);
+            leftButton.on("pointerdown", () => this.leftpress = true);
+            leftButton.on("pointerup", () => this.leftpress = false);
+            rightButton.on("pointerdown", () => this.rightpress = true);
+            rightButton.on("pointerup", () => this.rightpress = false);
+            upButton.on("pointerdown", () => this.uppress = true);
+            upButton.on("pointerup", () => this.uppress = false);
+            shootButton.on("pointerdown", () => this.shootpress = true);
+            shootButton.on("pointerup", () => this.shootpress = false);
+        }
         //createHealthBar(x,y,width,height,maxhealth){
         //    const bg = this.add.rectangle(x,y,width + 4, height + 4, 0x000000).setOrigin(0).setScrollFactor(0);
         //    const bar = this.add.rectangle(x+2 , y+2, width , height, 0xff0000).setOrigin(0).setScrollFactor(0);
@@ -415,6 +443,7 @@ export default class GameScene extends Phaser.Scene {
                 this.scoreText.setText('Score: '+ this.score);
                 this.worldlock = false;
                 this.setupCamera();
+                this.scene.start("winScene", { score: this.score });
             }
         }
 
@@ -530,6 +559,7 @@ export default class GameScene extends Phaser.Scene {
        //     this.enemy.hasFired = true;
        //     this.firebullet(this.enemy,this.player,this.bullets);
        // }
+       let fireinput = this.cursors.space.isDown || this.shootpress;
        if(!this.worldlock && this.player.x >= 2100){
         this.worldlock = true;
         this.cameras.main.startFollow(this.boss, true, 0.05, 0.05);
@@ -565,7 +595,7 @@ export default class GameScene extends Phaser.Scene {
             this.player.setVelocityY(-350);
             this.sfx.jump.play();
         }
-        if (this.cursors.space.isDown && !this.player.firetimer){
+        if (fireinput && !this.player.firetimer){
             this.player.firetimer = this.time.addEvent({
                 delay: 200,
                 callback: this.shoot,
@@ -573,11 +603,26 @@ export default class GameScene extends Phaser.Scene {
                 loop: true
             });
         }
-        if (this.cursors.space.isUp && this.player.firetimer){
+        //if (this.cursors.space.isUp && this.player.firetimer){
+        //        this.player.firetimer.remove();
+        //        this.player.firetimer = null;
+        //}
+        //mobile controls
+        if (this.leftpress)this.player.setVelocityX(-speed);
+        else if (this.rightpress)this.player.setVelocityX(speed);
+        if (this.uppress && this.player.body.touching.down)this.player.setVelocityY(-350),this.sfx.jump.play();
+        if (fireinput && !this.player.firetimer){
+            this.player.firetimer = this.time.addEvent({
+                delay: 200,
+                callback: this.shoot,
+                callbackScope: this,
+                loop: true
+            });
+        }
+        if (!fireinput && this.player.firetimer){
                 this.player.firetimer.remove();
                 this.player.firetimer = null;
-        }
-        
+        }   
         //WASD input
         if (this.keys.A.isDown)this.player.setVelocityX(-speed);
         if (this.keys.D.isDown)this.player.setVelocityX(speed);
