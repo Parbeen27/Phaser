@@ -8,5 +8,9 @@ export default class WinScene extends Phaser.Scene {
     create() {
         this.add.text(100, 100, "You Win!", { fontSize: "32px", fill: "#00ff00" });
         this.add.text(100, 150, "Final Score: " + this.score, { fontSize: "24px", fill: "#00ff00" });
+        this.add.text(100, 200, "Press SPACE to return to the menu", { fontSize: "18px", fill: "#00ff00" });
+        this.input.keyboard.once('keydown-SPACE', () => {
+            this.scene.start('menuScene');
+        });
     }
 }   

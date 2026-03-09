@@ -51,7 +51,7 @@ export default class GameScene extends Phaser.Scene {
         this.player.damage = 10;
         // Get platform position
         this.createPlatforms();
-        let platform = this.platforms.getChildren()[1];
+        let platform = this.platforms.getChildren()[2];
         //enemy
         this.enemy = this.physics.add.sprite(platform.x, platform.y-100, "enemy");
         this.enemy.setScale(.2);
@@ -270,7 +270,7 @@ export default class GameScene extends Phaser.Scene {
         //keyboard input
         this.createControls();
         if(this.sys.game.device.input.touch || window.innerWidth < 900){
-            this.createMobileControls();
+            //this.createMobileControls();
         }
         //sounds
         this.sfx = {
@@ -300,7 +300,7 @@ export default class GameScene extends Phaser.Scene {
 
         setupCamera() {
             this.cameras.main.startFollow(this.player, true, 0.05, 0.05);
-        //    this.cameras.main.setBounds(0, 0, 3000, this.scale.height);
+            this.cameras.main.setZoom(Math.min(this.scale.width / 800, this.scale.height / 600));
             this.cameras.main.setBackgroundColor('#87CEEB');
         }
         createControls (){
@@ -592,7 +592,7 @@ export default class GameScene extends Phaser.Scene {
             this.player.stop();
         }   
         if (this.cursors.up.isDown && this.player.body.touching.down){
-            this.player.setVelocityY(-350);
+            this.player.setVelocityY(-450);
             this.sfx.jump.play();
         }
         if (fireinput && !this.player.firetimer){
@@ -603,13 +603,21 @@ export default class GameScene extends Phaser.Scene {
                 loop: true
             });
         }
-        //if (this.cursors.space.isUp && this.player.firetimer){
-        //        this.player.firetimer.remove();
-        //        this.player.firetimer = null;
-        //}
+        if (this.cursors.space.isUp && this.player.firetimer){
+                this.player.firetimer.remove();
+                this.player.firetimer = null;
+        }
         //mobile controls
-        if (this.leftpress)this.player.setVelocityX(-speed);
-        else if (this.rightpress)this.player.setVelocityX(speed);
+        if (this.leftpress){
+            this.player.setVelocityX(-speed);
+            this.player.play("run", true);
+            this.player.setFlipX(true);
+        }
+        else if (this.rightpress){
+            this.player.setVelocityX(speed);
+            this.player.play("run", true);
+            this.player.setFlipX(false);
+        }
         if (this.uppress && this.player.body.touching.down)this.player.setVelocityY(-350),this.sfx.jump.play();
         if (fireinput && !this.player.firetimer){
             this.player.firetimer = this.time.addEvent({
