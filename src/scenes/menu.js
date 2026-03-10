@@ -9,6 +9,7 @@ export default class MenuScene extends Phaser.Scene {
             this.scene.pause();
         } else {
             rotatediv.style.display = 'none';
+            this.game.scale.refresh();
             this.scene.resume();
         }
     }
