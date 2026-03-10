@@ -270,7 +270,7 @@ export default class GameScene extends Phaser.Scene {
         //keyboard input
         this.createControls();
         if(this.sys.game.device.input.touch || window.innerWidth < 900){
-            this.createMobileControls();
+           // this.createMobileControls();
         }
         //sounds
         this.sfx = {
