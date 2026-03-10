@@ -269,8 +269,8 @@ export default class GameScene extends Phaser.Scene {
      //   this.setupCamera();
         //keyboard input
         this.createControls();
-        if(this.sys.game.device.input.touch || window.innerWidth < 900){
-           // this.createMobileControls();
+        if(this.sys.game.device.os.android || this.sys.game.device.os.iOS){
+            this.createMobileControls();
         }
         //sounds
         this.sfx = {
@@ -312,18 +312,57 @@ export default class GameScene extends Phaser.Scene {
             this.rightpress = false;
             this.uppress = false;
             this.shootpress = false;
-            const leftButton = this.add.image(80, this.scale.height - 80, "left").setInteractive().setScrollFactor(0).setScale(.2);
-            const rightButton = this.add.image(160, this.scale.height - 80, "right").setInteractive().setScrollFactor(0).setScale(.2).setFlipX(true);
+            const h = this.scale.height;
+            const w = this.scale.width;
+            this.joypointer = null;
+            //joystick base
+            this.joybase = this.add.circle(80, h - 80, 40, 0x888888, 0.5).setScrollFactor(0).setInteractive();
+            this.joystick = this.add.circle(80, h - 80, 20, 0xcccccc, 0.8).setScrollFactor(0).setInteractive();
             const upButton = this.add.image(this.scale.width - 160, this.scale.height - 80, "up").setInteractive().setScrollFactor(0).setScale(.2);
             const shootButton = this.add.image(this.scale.width - 80, this.scale.height - 80, "shoot").setInteractive().setScrollFactor(0).setScale(.2);
-            leftButton.on("pointerdown", () => this.leftpress = true);
-            leftButton.on("pointerup", () => this.leftpress = false);
-            rightButton.on("pointerdown", () => this.rightpress = true);
-            rightButton.on("pointerup", () => this.rightpress = false);
+            //joystick input
+            this.input.on("pointerdown", (pointer) => {
+                if (pointer.x < w / 2) {
+                    this.joypointer = pointer;}
+                });
+            this.input.on("pointermove", (pointer) => {
+                if (this.joypointer === pointer) {
+                    const dx = pointer.x - this.joybase.x;
+                    this.joystick.x = this.joybase.x + Phaser.Math.Clamp(dx, -40, 40);
+                    if (dx < -15) {
+                        this.leftpress = true;
+                        this.rightpress = false;
+                    } else if (dx >15) {
+                        this.leftpress = false;
+                        this.rightpress = true;
+                    } else {
+                        this.leftpress = false;
+                        this.rightpress = false;
+                    }
+                }
+            });
+            this.input.on("pointerup", () => {
+                if (this.joypointer===pointer) {
+                    this.leftpress = false;
+                    this.rightpress = false;
+                    this.joystick.setPosition(this.joybase.x, this.joybase.y);
+                    this.joypointer = null;
+        }});
             upButton.on("pointerdown", () => this.uppress = true);
             upButton.on("pointerup", () => this.uppress = false);
+            upButton.on("pointerout", () => this.uppress = false);
             shootButton.on("pointerdown", () => this.shootpress = true);
             shootButton.on("pointerup", () => this.shootpress = false);
+            shootButton.on("pointerout", () => this.shootpress = false);
+            //resize controls on orientation change
+            this.scale.on('resize', (gameSize) => {
+                const w = gameSize.width;
+                const h = gameSize.height;
+                this.joybase.setPosition(80, h - 80);
+                this.joystick.setPosition(80, h - 80);
+                upButton.setPosition(w - 160, h - 80);
+                shootButton.setPosition(w - 80, h - 80);
+            }); 
         }
         //createHealthBar(x,y,width,height,maxhealth){
         //    const bg = this.add.rectangle(x,y,width + 4, height + 4, 0x000000).setOrigin(0).setScrollFactor(0);
@@ -559,6 +598,9 @@ export default class GameScene extends Phaser.Scene {
        //     this.enemy.hasFired = true;
        //     this.firebullet(this.enemy,this.player,this.bullets);
        // }
+       let left = this.cursors.left.isDown || this.keys.A.isDown || this.leftpress;
+       let right = this.cursors.right.isDown || this.keys.D.isDown || this.rightpress;
+       let jump = this.cursors.up.isDown || this.keys.W.isDown || this.uppress;
        let fireinput = this.cursors.space.isDown || this.shootpress;
        if(!this.worldlock && this.player.x >= 2100){
         this.worldlock = true;
@@ -578,47 +620,51 @@ export default class GameScene extends Phaser.Scene {
         this.handleshooting(this.boss);
     //    this.physics.moveToObject(this.enemy, this.player, 100);
         //arrow key input
-        if (this.cursors.left.isDown){
+        //if (this.cursors.left.isDown){
+        //    this.player.setVelocityX(-speed);
+        //    this.player.play("run", true);
+        //    this.player.setFlipX(true);
+        //} else if (this.cursors.right.isDown){
+        //    this.player.setVelocityX(speed);
+        //    this.player.play("run", true);
+        //    this.player.setFlipX(false);
+        //}
+        //else {
+        //    this.player.setVelocityX(0);
+        //    this.player.stop();
+        //}   
+        //if (this.cursors.up.isDown && this.player.body.touching.down){
+        //    this.player.setVelocityY(-450);
+        //    this.sfx.jump.play();
+        //}
+        //if (fireinput && !this.player.firetimer){
+        //    this.player.firetimer = this.time.addEvent({
+        //        delay: 200,
+        //        callback: this.shoot,
+        //        callbackScope: this,
+        //        loop: true
+        //    });
+        //}
+        //if (!fireinput && this.player.firetimer){
+        //        this.player.firetimer.remove();
+        //        this.player.firetimer = null;
+        //}
+        //controls
+        if (left){
             this.player.setVelocityX(-speed);
             this.player.play("run", true);
             this.player.setFlipX(true);
-        } else if (this.cursors.right.isDown){
+        }
+        else if (right){
             this.player.setVelocityX(speed);
             this.player.play("run", true);
             this.player.setFlipX(false);
         }
         else {
             this.player.setVelocityX(0);
-            this.player.stop();
-        }   
-        if (this.cursors.up.isDown && this.player.body.touching.down){
-            this.player.setVelocityY(-450);
-            this.sfx.jump.play();
+            this.player.anims.stop();
         }
-        if (fireinput && !this.player.firetimer){
-            this.player.firetimer = this.time.addEvent({
-                delay: 200,
-                callback: this.shoot,
-                callbackScope: this,
-                loop: true
-            });
-        }
-        if (this.cursors.space.isUp && this.player.firetimer){
-                this.player.firetimer.remove();
-                this.player.firetimer = null;
-        }
-        //mobile controls
-        if (this.leftpress){
-            this.player.setVelocityX(-speed);
-            this.player.play("run", true);
-            this.player.setFlipX(true);
-        }
-        else if (this.rightpress){
-            this.player.setVelocityX(speed);
-            this.player.play("run", true);
-            this.player.setFlipX(false);
-        }
-        if (this.uppress && this.player.body.touching.down)this.player.setVelocityY(-350),this.sfx.jump.play();
+        if (jump && this.player.body.blocked.down)this.player.setVelocityY(-350),this.sfx.jump.play();
         if (fireinput && !this.player.firetimer){
             this.player.firetimer = this.time.addEvent({
                 delay: 200,
