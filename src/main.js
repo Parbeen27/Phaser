@@ -22,6 +22,9 @@ const config = {
             debug: false
         }
     },
+    input: {
+        activePointers: 3, // Allow up to 3 simultaneous touch inputs
+    },
     scene: [BootScene,MenuScene,
          GameScene, GameOverScene,WinScene]
 }
