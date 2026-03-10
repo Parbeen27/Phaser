@@ -33,7 +33,8 @@ export default class GameScene extends Phaser.Scene {
         console.log("Creating game scene...");
         this.physics.world.setBounds(0, 0, 3000, this.scale.height);
         this.cameras.main.setBounds(0, 0, 3000, this.scale.height);
-     //   this.cameras.main.setZoom(0.5);
+     //   this.cameras.main.setZoom(0.5)
+
 
         //player
         this.player = this.physics.add.sprite(this.scale.width / 2,this.scale.height / 2, "player");  
@@ -49,6 +50,7 @@ export default class GameScene extends Phaser.Scene {
         this.player.firerate = 500;
         this.player.firetimer = null;
         this.player.damage = 10;
+        this.nextfire = 0;
         // Get platform position
         this.createPlatforms();
         let platform = this.platforms.getChildren()[2];
@@ -318,8 +320,10 @@ export default class GameScene extends Phaser.Scene {
             //joystick base
             this.joybase = this.add.circle(80, h - 80, 40, 0x888888, 0.5).setScrollFactor(0).setInteractive();
             this.joystick = this.add.circle(80, h - 80, 20, 0xcccccc, 0.8).setScrollFactor(0).setInteractive();
-            const upButton = this.add.image(this.scale.width - 160, this.scale.height - 80, "up").setInteractive().setScrollFactor(0).setScale(.2);
-            const shootButton = this.add.image(this.scale.width - 80, this.scale.height - 80, "shoot").setInteractive().setScrollFactor(0).setScale(.2);
+            this.upbuttozone = this.add.zone(w - 160, h - 80, 80, 80).setScrollFactor(0).setInteractive().setOrigin(0.5);
+            const upButton = this.add.image(this.upbuttozone.x, this.upbuttozone.y, "up").setInteractive().setScrollFactor(0).setScale(.2).setDepth(1001);
+            this.shootbuttonzone = this.add.zone(w - 80, h - 80, 80, 80).setScrollFactor(0).setInteractive().setOrigin(0.5);
+            const shootButton = this.add.image(this.shootbuttonzone.x, this.shootbuttonzone.y, "shoot").setInteractive().setScrollFactor(0).setScale(.2).setDepth(1001);
             //joystick input
             this.input.on("pointerdown", (pointer) => {
                 if (pointer.x < w / 2) {
@@ -348,19 +352,33 @@ export default class GameScene extends Phaser.Scene {
                     this.joystick.setPosition(this.joybase.x, this.joybase.y);
                     this.joypointer = null;
         }});
-            upButton.on("pointerdown", () => this.uppress = true);
-            upButton.on("pointerup", () => this.uppress = false);
-            upButton.on("pointerout", () => this.uppress = false);
-            shootButton.on("pointerdown", () => this.shootpress = true);
-            shootButton.on("pointerup", () => this.shootpress = false);
-            shootButton.on("pointerout", () => this.shootpress = false);
+            upButton.on("pointerdown", () =>  {
+                this.uppress = true;
+                upButton.setTint(0xaaaaaa);});
+            upButton.on("pointerup", () => {
+                this.uppress = false;
+                upButton.clearTint();});
+            upButton.on("pointerout", () => {
+                this.uppress = false;
+                upButton.clearTint();});
+            shootButton.on("pointerdown", () => {
+                this.shootpress = true;
+                shootButton.setTint(0xaaaaaa);});
+            shootButton.on("pointerup", () => {
+                this.shootpress = false;
+                shootButton.clearTint();});
+            shootButton.on("pointerout", () => {
+                this.shootpress = false;
+                shootButton.clearTint();});
             //resize controls on orientation change
             this.scale.on('resize', (gameSize) => {
                 const w = gameSize.width;
                 const h = gameSize.height;
                 this.joybase.setPosition(80, h - 80);
                 this.joystick.setPosition(80, h - 80);
+                this.upbuttozone.setPosition(w - 160, h - 80);
                 upButton.setPosition(w - 160, h - 80);
+                this.shootbuttonzone.setPosition(w - 80, h - 80);
                 shootButton.setPosition(w - 80, h - 80);
             }); 
         }
@@ -665,18 +683,12 @@ export default class GameScene extends Phaser.Scene {
             this.player.anims.stop();
         }
         if (jump && this.player.body.blocked.down)this.player.setVelocityY(-350),this.sfx.jump.play();
-        if (fireinput && !this.player.firetimer){
-            this.player.firetimer = this.time.addEvent({
-                delay: 200,
-                callback: this.shoot,
-                callbackScope: this,
-                loop: true
-            });
+        if (fireinput){
+            if(this.time.now > this.nextfire){
+                this.shoot();
+                this.nextfire = this.time.now + 200;
+            }
         }
-        if (!fireinput && this.player.firetimer){
-                this.player.firetimer.remove();
-                this.player.firetimer = null;
-        }   
         //WASD input
         if (this.keys.A.isDown)this.player.setVelocityX(-speed);
         if (this.keys.D.isDown)this.player.setVelocityX(speed);
