@@ -8,26 +8,24 @@ export default class GameScene extends Phaser.Scene {
         console.log("Preloading assets...");
         this.load.atlas(
             "player",
-            "/assets/player_run.png",
-            "/assets/player_run.json"
+            "/assets/PlatformGame/player_run.png",
+            "/assets/PlatformGame/player_run.json"
         );
         this.load.atlas(
             "enemy",
-            "/assets/enemy.png",
-            "/assets/enemy.json"
+            "/assets/PlatformGame/enemy.png",
+            "/assets/PlatformGame/enemy.json"
         );
      //   this.load.image("player","/assets/player.png");
-        this.load.image("platform","/assets/platform.png");
-        this.load.image("coin","/assets/coin.png");
-        this.load.audio("jump", "/assets/jump.wav");
-        this.load.audio("coinSound", "/assets/coin.wav");
-        this.load.audio("gameOverSound", "/assets/gameover.wav");
-        this.load.audio("hitSound", "/assets/hit.mp3");
-        this.load.image("bullet","/assets/bullet.png");
-        this.load.image("left","/assets/btnleft.png");
-        this.load.image("right","/assets/btnleft.png");
-        this.load.image("up","/assets/btnup.png");
-        this.load.image("shoot","/assets/shoot.png");
+        this.load.image("platform","/assets/PlatformGame/platform.png");
+        this.load.image("coin","/assets/PlatformGame/coin.png");
+        this.load.audio("jump", "/assets/PlatformGame/jump.wav");
+        this.load.audio("coinSound", "/assets/PlatformGame/coin.wav");
+        this.load.audio("gameOverSound", "/assets/PlatformGame/gameover.wav");
+        this.load.audio("hitSound", "/assets/PlatformGame/hit.mp3");
+        this.load.image("bullet","/assets/PlatformGame/bullet.png");
+        this.load.image("up","assets/PlatformGame/jump.png");
+        this.load.image("shoot","/assets/PlatformGame/shoot.png");
     }
     create() {
         console.log("Creating game scene...");
@@ -274,6 +272,15 @@ export default class GameScene extends Phaser.Scene {
         if(this.sys.game.device.os.android || this.sys.game.device.os.iOS){
             this.createMobileControls();
         }
+        //back button
+        this.input.keyboard.on('keydown-ESC', () => {
+            this.scene.start("menuScene");
+        });
+        this.add.text(this.scale.width - 100, 20, "Back",{
+            fontSize: '24px',
+            backgroundColor: '#000',
+        }).setInteractive().setScrollFactor(0).on('pointerdown', () => {
+            this.scene.start("menuScene");});
         //sounds
         this.sfx = {
             jump: this.sound.add("jump"),
@@ -321,9 +328,9 @@ export default class GameScene extends Phaser.Scene {
             this.joybase = this.add.circle(80, h - 80, 40, 0x888888, 0.5).setScrollFactor(0).setInteractive();
             this.joystick = this.add.circle(80, h - 80, 20, 0xcccccc, 0.8).setScrollFactor(0).setInteractive();
             this.upbuttozone = this.add.zone(w - 160, h - 80, 80, 80).setScrollFactor(0).setInteractive().setOrigin(0.5);
-            const upButton = this.add.image(this.upbuttozone.x, this.upbuttozone.y, "up").setInteractive().setScrollFactor(0).setScale(.2).setDepth(1001);
+            const upButton = this.add.image(this.upbuttozone.x, this.upbuttozone.y+10, "up").setInteractive().setScrollFactor(0).setScale(.1).setDepth(1001);
             this.shootbuttonzone = this.add.zone(w - 80, h - 80, 80, 80).setScrollFactor(0).setInteractive().setOrigin(0.5);
-            const shootButton = this.add.image(this.shootbuttonzone.x, this.shootbuttonzone.y, "shoot").setInteractive().setScrollFactor(0).setScale(.2).setDepth(1001);
+            const shootButton = this.add.image(this.shootbuttonzone.x, this.shootbuttonzone.y+10, "shoot").setInteractive().setScrollFactor(0).setScale(.1).setDepth(1001);
             //joystick input
             this.input.on("pointerdown", (pointer) => {
                 if (pointer.x < w / 2) {
@@ -382,20 +389,6 @@ export default class GameScene extends Phaser.Scene {
                 shootButton.setPosition(w - 80, h - 80);
             }); 
         }
-        //createHealthBar(x,y,width,height,maxhealth){
-        //    const bg = this.add.rectangle(x,y,width + 4, height + 4, 0x000000).setOrigin(0).setScrollFactor(0);
-        //    const bar = this.add.rectangle(x+2 , y+2, width , height, 0xff0000).setOrigin(0).setScrollFactor(0);
-//
-        //    return{
-        //        maxhealth,
-        //        currentHealth: maxhealth,
-        //        update(health){
-        //            this.currentHealth = health;
-        //            const percentage = Phaser.Math.Clamp(health / this.maxhealth, 0,1);
-        //            bar.width = width * percentage;
-        //        }
-        //    };
-        //}
         PlayerHit(player){
             if(this.isHit) return; //prevent health loss every frame
             this.isHit = true;

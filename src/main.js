@@ -1,8 +1,9 @@
 import Phaser from 'phaser';
 import MenuScene from './scenes/menu.js';
-import GameScene from './scenes/game.js';  
-import GameOverScene from './scenes/gameover.js';
-import WinScene from './scenes/win.js';
+import GameScene from './scenes/Platfrom runner/game.js';  
+import GameOverScene from './scenes/Platfrom runner/gameover.js';
+import WinScene from './scenes/Platfrom runner/win.js';
+import BootScene from './scenes/BootScene.js';
 
 const config = {
     type: Phaser.AUTO,
@@ -21,7 +22,7 @@ const config = {
             debug: false
         }
     },
-    scene: [MenuScene,
+    scene: [BootScene,MenuScene,
          GameScene, GameOverScene,WinScene]
 }
 
