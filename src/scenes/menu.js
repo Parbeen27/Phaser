@@ -14,7 +14,12 @@ export default class MenuScene extends Phaser.Scene {
     }
     create() {
         this.checkOrientation();
-        window.addEventListener('resize', () => this.checkOrientation());
+        window.addEventListener('resize', () => {
+            setTimeout(() => {
+                this.scale.refresh();
+            },200);
+        });
+        window.addEventListener('orientationchange', () => this.checkOrientation());
         this.add.text(100, 100, "Welcome to the Game!", { font: "32px Arial", fill: "#ffffff" });
         this.add.text(100, 200, "Press SPACE or TAP to Start", { font: "24px Arial", fill: "#ffffff" });
         this.add.text(100, 300, "Press F to Toggle Fullscreen", { font: "18px Arial", fill: "#ffffff" });

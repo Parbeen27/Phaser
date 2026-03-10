@@ -341,8 +341,8 @@ export default class GameScene extends Phaser.Scene {
                     }
                 }
             });
-            this.input.on("pointerup", () => {
-                if (this.joypointer===pointer) {
+            this.input.on("pointerup", (pointer) => {
+                if (this.joypointer === pointer) {
                     this.leftpress = false;
                     this.rightpress = false;
                     this.joystick.setPosition(this.joybase.x, this.joybase.y);
