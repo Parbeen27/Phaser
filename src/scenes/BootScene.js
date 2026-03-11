@@ -3,6 +3,7 @@ export default class BootScene extends Phaser.Scene {
         super('bootScene');
     }
     preload() {
+        this.load.setBaseURL(import.meta.env.BASE_URL);
         this.load.setPath('assets/');
         this.load.image('PlatformGame', 'PlatformGame/game1.png');
     }
