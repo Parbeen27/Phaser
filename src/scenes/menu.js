@@ -15,7 +15,8 @@ export default class MenuScene extends Phaser.Scene {
             },200);
         });
         const game = [
-            { key: 'PlatformGame', text: 'Platform Runner', scene: 'gameScene' }
+            { key: 'PlatformGame', text: 'Platform Runner', scene: 'gameScene'},
+            { key: 'SpaceBattle' , text: 'Space Battle'   , scene: 'SpaceBattleScene'}
         ];
         let startx = 250;
         let starty = 200;

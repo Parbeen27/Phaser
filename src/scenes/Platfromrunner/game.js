@@ -4,7 +4,6 @@ export default class GameScene extends Phaser.Scene {
         super('gameScene');
     }
     preload() {
-        console.log("Preloading assets...");
         this.load.pack("game1","assets/PlatformGame/Assets.json");
 
     }
@@ -480,6 +479,7 @@ export default class GameScene extends Phaser.Scene {
 
         playerDies(){
             this.sfx.gameOver.play();
+            this.scene.stop('gameScene')
             this.scene.start("gameOverScene");
         } 
         collectAmmo(player,ammo){
@@ -611,37 +611,7 @@ export default class GameScene extends Phaser.Scene {
              }}
         this.handleshooting(this.enemy);
         this.handleshooting(this.boss);
-    //    this.physics.moveToObject(this.enemy, this.player, 100);
-        //arrow key input
-        //if (this.cursors.left.isDown){
-        //    this.player.setVelocityX(-speed);
-        //    this.player.play("run", true);
-        //    this.player.setFlipX(true);
-        //} else if (this.cursors.right.isDown){
-        //    this.player.setVelocityX(speed);
-        //    this.player.play("run", true);
-        //    this.player.setFlipX(false);
-        //}
-        //else {
-        //    this.player.setVelocityX(0);
-        //    this.player.stop();
-        //}   
-        //if (this.cursors.up.isDown && this.player.body.touching.down){
-        //    this.player.setVelocityY(-450);
-        //    this.sfx.jump.play();
-        //}
-        //if (fireinput && !this.player.firetimer){
-        //    this.player.firetimer = this.time.addEvent({
-        //        delay: 200,
-        //        callback: this.shoot,
-        //        callbackScope: this,
-        //        loop: true
-        //    });
-        //}
-        //if (!fireinput && this.player.firetimer){
-        //        this.player.firetimer.remove();
-        //        this.player.firetimer = null;
-        //}
+
         //controls
         if (left){
             this.player.setVelocityX(-speed);
@@ -664,11 +634,6 @@ export default class GameScene extends Phaser.Scene {
                 this.nextfire = this.time.now + 200;
             }
         }
-        //WASD input
-        if (this.keys.A.isDown)this.player.setVelocityX(-speed);
-        if (this.keys.D.isDown)this.player.setVelocityX(speed);
-        if (this.keys.W.isDown && this.player.body.touching.down)this.player.setVelocityY(-350),this.sfx.jump.play();
-        if (this.keys.S.isDown)this.player.setVelocityY(speed);        
 }
 
 }

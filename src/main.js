@@ -1,10 +1,6 @@
 import Phaser from 'phaser';
-//import MenuScene from './scenes/menu.js';
-//import BootScene from './scenes/BootScene.js';
 import scenes from './scenes/index.js';
-//import GameScene from './scenes/Platfromrunner/game.js'
-//import GameOverScene from './scenes/Platfromrunner/gameover.js';
-//import WinScene from './scenes/Platfromrunner/win.js';
+
 const config = {
     type: Phaser.AUTO,
     width: 800,
