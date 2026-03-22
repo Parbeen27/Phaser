@@ -1,0 +1,45 @@
+{
+    "files" : [
+        {
+            "key" : "background",
+            "type": "image",
+            "url" : "assets/SpaceBattle/background.jpg"
+        },
+        {
+            "type" : "atlas",
+            "key"  : "player1",
+            "textureURL"  : "assets/SpaceBattle/player.png",
+            "atlasURL" : "assets/SpaceBattle/player.json"
+        },
+        {
+            "type" : "atlas",
+            "key"  : "player_bullet",
+            "textureURL"  : "assets/SpaceBattle/player_bullet.png",
+            "atlasURL" : "assets/SpaceBattle/player_bullet.json"
+        },
+        {
+            "type" : "atlas",
+            "key"  : "enemy1",
+            "textureURL"  : "assets/SpaceBattle/enemy.png",
+            "atlasURL" : "assets/SpaceBattle/enemy.json"
+        },
+        {
+            "type" : "atlas",
+            "key"  : "enemy2",
+            "textureURL"  : "assets/SpaceBattle/enemy2.png",
+            "atlasURL" : "assets/SpaceBattle/enemy2.json"
+        },
+        {
+            "type" : "atlas",
+            "key"  : "boss1",
+            "textureURL"  : "assets/SpaceBattle/boss.png",
+            "atlasURL" : "assets/SpaceBattle/boss.json"
+        },
+        {
+            "type" : "atlas",
+            "key"  : "explosion",
+            "textureURL"  : "assets/SpaceBattle/explosion.png",
+            "atlasURL" : "assets/SpaceBattle/explosion.json"
+        }
+    ]
+}

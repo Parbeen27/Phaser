@@ -1,0 +1,193 @@
+{
+  "frames": {
+    "restored_0.png": {
+      "frame": {
+        "x": 659,
+        "y": 341,
+        "w": 258,
+        "h": 147
+      },
+      "rotated": false,
+      "trimed": true,
+      "spriteSourceSize": {
+        "x": 311,
+        "y": 230,
+        "w": 569,
+        "h": 377
+      },
+      "sourceSize": {
+        "w": 880,
+        "h": 589
+      }
+    },
+    "restored_1.png": {
+      "frame": {
+        "x": 361,
+        "y": 0,
+        "w": 277,
+        "h": 152
+      },
+      "rotated": false,
+      "trimed": true,
+      "spriteSourceSize": {
+        "x": 302,
+        "y": 226,
+        "w": 579,
+        "h": 378
+      },
+      "sourceSize": {
+        "w": 880,
+        "h": 589
+      }
+    },
+    "restored_2.png": {
+      "frame": {
+        "x": 691,
+        "y": 0,
+        "w": 331,
+        "h": 155
+      },
+      "rotated": false,
+      "trimed": true,
+      "spriteSourceSize": {
+        "x": 268,
+        "y": 224,
+        "w": 599,
+        "h": 379
+      },
+      "sourceSize": {
+        "w": 880,
+        "h": 589
+      }
+    },
+    "restored_3.png": {
+      "frame": {
+        "x": 0,
+        "y": 349,
+        "w": 311,
+        "h": 159
+      },
+      "rotated": false,
+      "trimed": true,
+      "spriteSourceSize": {
+        "x": 285,
+        "y": 222,
+        "w": 596,
+        "h": 381
+      },
+      "sourceSize": {
+        "w": 880,
+        "h": 589
+      }
+    },
+    "restored_4.png": {
+      "frame": {
+        "x": 351,
+        "y": 169,
+        "w": 340,
+        "h": 165
+      },
+      "rotated": false,
+      "trimed": true,
+      "spriteSourceSize": {
+        "x": 263,
+        "y": 218,
+        "w": 603,
+        "h": 383
+      },
+      "sourceSize": {
+        "w": 880,
+        "h": 589
+      }
+    },
+    "restored_5.png": {
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 361,
+        "h": 169
+      },
+      "rotated": false,
+      "trimed": true,
+      "spriteSourceSize": {
+        "x": 256,
+        "y": 216,
+        "w": 617,
+        "h": 385
+      },
+      "sourceSize": {
+        "w": 880,
+        "h": 589
+      }
+    },
+    "restored_6.png": {
+      "frame": {
+        "x": 351,
+        "y": 334,
+        "w": 308,
+        "h": 175
+      },
+      "rotated": false,
+      "trimed": true,
+      "spriteSourceSize": {
+        "x": 287,
+        "y": 212,
+        "w": 595,
+        "h": 387
+      },
+      "sourceSize": {
+        "w": 880,
+        "h": 589
+      }
+    },
+    "restored_7.png": {
+      "frame": {
+        "x": 0,
+        "y": 169,
+        "w": 351,
+        "h": 180
+      },
+      "rotated": false,
+      "trimed": true,
+      "spriteSourceSize": {
+        "x": 268,
+        "y": 209,
+        "w": 619,
+        "h": 389
+      },
+      "sourceSize": {
+        "w": 880,
+        "h": 589
+      }
+    },
+    "restored_8.png": {
+      "frame": {
+        "x": 691,
+        "y": 155,
+        "w": 316,
+        "h": 186
+      },
+      "rotated": false,
+      "trimed": true,
+      "spriteSourceSize": {
+        "x": 281,
+        "y": 206,
+        "w": 597,
+        "h": 392
+      },
+      "sourceSize": {
+        "w": 880,
+        "h": 589
+      }
+    }
+  },
+  "meta": {
+    "image": "https://static.seeles.ai/media/video_sprite_webp/video_sprite_cf4c7d8c_2335_457d_ab52_0240e4a89f3e_1773833954606635516.webp",
+    "format": "RGBA8888",
+    "size": {
+      "w": 1024,
+      "h": 512
+    },
+    "scale": 1
+  }
+}
