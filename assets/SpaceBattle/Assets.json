@@ -40,6 +40,34 @@
             "key"  : "explosion",
             "textureURL"  : "assets/SpaceBattle/explosion.png",
             "atlasURL" : "assets/SpaceBattle/explosion.json"
+        },
+        {
+            "type" : "atlas",
+            "key"  : "enemy_bullet",
+            "textureURL"  : "assets/SpaceBattle/enemy_bullet.png",
+            "atlasURL" : "assets/SpaceBattle/enemy_bullet.json"
+        },
+        {
+            "key" : "BossTheme",
+            "type": "audio",
+            "url" : "assets/SpaceBattle/BossTheme.mp3"
+        },
+        {
+            "key" : "shield",
+            "type": "atlas",
+            "textureURL"  : "assets/SpaceBattle/powerup.png",
+            "atlasURL" : "assets/SpaceBattle/powerup.json"
+        },
+        {
+            "key" : "ammo",
+            "type": "atlas",
+            "textureURL"  : "assets/SpaceBattle/bulletpickup.png",
+            "atlasURL" : "assets/SpaceBattle/bulletpickup.json"
+        },
+        {
+            "type" : "image",
+            "key"  : "shoot",
+            "url"  : "assets/PlatformGame/shoot.png"
         }
     ]
 }
