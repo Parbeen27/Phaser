@@ -1,0 +1,24 @@
+{
+    "files" : [
+        {
+            "type" : "image",
+            "key"  : "coin",
+            "url"  : "assets/PlatformGame/coin.png" 
+        },
+        {
+            "type" : "image",
+            "key"  : "bullet",
+            "url"  : "assets/PlatformGame/bullet.png"
+        },
+        {
+            "type" : "image",
+            "key"  : "up",
+            "url"  : "assets/PlatformGame/jump.png"
+        },
+        {
+            "type" : "image",
+            "key"  : "shoot",
+            "url"  : "assets/PlatformGame/shoot.png"
+        }
+    ]
+}
