@@ -8,14 +8,17 @@ export default class GameScene extends Phaser.Scene {
 
     }
     create() {
+        const width = this.scale.width;
+        const height = this.scale.height;
+        this.gamecontainer = this.add.container(0,0);
         console.log("Creating game scene...");
-        this.physics.world.setBounds(0, 0, 3000, this.scale.height);
-        this.cameras.main.setBounds(0, 0, 3000, this.scale.height);
+        this.physics.world.setBounds(0, 0, 3000, height);
+        this.cameras.main.setBounds(0, 0, 3000, height);
      //   this.cameras.main.setZoom(0.5)
 
 
         //player
-        this.player = this.physics.add.sprite(this.scale.width / 2,this.scale.height / 2, "player");  
+        this.player = this.physics.add.sprite(width / 2,height / 2, "player");  
         this.player.setScale(.2);  
         this.player.body.setSize(this.player.width, this.player.height);
         this.player.body.setOffset(0, 0);
@@ -30,7 +33,7 @@ export default class GameScene extends Phaser.Scene {
         this.player.damage = 10;
         this.nextfire = 0;
         // Get platform position
-        this.createPlatforms();
+        this.createPlatforms(height);
         let platform = this.platforms.getChildren()[2];
         //enemy
         this.enemy = this.physics.add.sprite(platform.x, platform.y-100, "enemy");
@@ -44,7 +47,7 @@ export default class GameScene extends Phaser.Scene {
         this.enemy.health = 100;
         this.enemy.scoreValue = 50;
         //boss
-        this.boss = this.physics.add.sprite(2800, this.scale.height - 100, "enemy");
+        this.boss = this.physics.add.sprite(2800, height - 100, "enemy");
         this.boss.setScale(.3);
         this.boss.body.setSize(220, 340);  // tweak these
         this.boss.body.setOffset(216,10); // tweak these too
@@ -73,7 +76,7 @@ export default class GameScene extends Phaser.Scene {
         });
         //floor - create platforms FIRST before adding colliders
         this.ground = this.physics.add.staticGroup();
-        this.ground.create(3000/2, this.scale.height - 10, "platform").setDisplaySize(3000, 22).setOrigin(0.5, 0.5).refreshBody();
+        this.floor = this.ground.create(3000/2,height - 10, "platform").setDisplaySize(3000, 22).setOrigin(0.5, 1).refreshBody();
         
         this.physics.add.collider(this.player, this.ground);
         this.physics.add.collider(this.enemy, this.ground);
@@ -148,7 +151,7 @@ export default class GameScene extends Phaser.Scene {
 
         //ammo
         this.ammocount = 10;
-        this.ammoText = this.add.text(16, 80, 'Ammo: 10', { fontSize: '16px', fill: '#000' }).setScrollFactor(0);
+        this.ammoText = this.add.text(16, 80, 'Ammo𖦏: 10', { fontSize: '26px', fill: '#000',fontStyle: 'bold' }).setScrollFactor(0);
         this.ammo = this.physics.add.group({
             key: "bullet",
             repeat: 4,
@@ -179,7 +182,7 @@ export default class GameScene extends Phaser.Scene {
         }, null, this);
         //score
         this.score = 0;
-        this.scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#000' }).setScrollFactor(0);
+        this.scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '42px', fill: '#000',fontStyle: 'bold' }).setScrollFactor(0);
         this.physics.add.overlap(this.player, this.coins,(player,coin) => {
             coin.disableBody(true,true);
             this.sfx.coin.play();
@@ -220,7 +223,7 @@ export default class GameScene extends Phaser.Scene {
         this.physics.add.overlap(this.player, this.gundrop, this.collectGun,null,this);
         //powertimer
         this.powertimer = 0;
-        this.powertext = this.add.text(16, 110, '', { fontSize: '16px', fill: '#000' }).setScrollFactor(0);
+        this.powertext = this.add.text(16, 110, '', { fontSize: '16px', fill: '#000' ,fontStyle: 'bold'}).setScrollFactor(0);
         //animations
         this.anims.create({
             key: "run",
@@ -242,7 +245,7 @@ export default class GameScene extends Phaser.Scene {
         this.player.play("run");
         //healthbar
         this.playerHealth = 100;
-        this.playerHealthtext = this.add.text(16, 50, 'Health: 100', { fontSize: '16px', fill: '#000' }).setScrollFactor(0);
+        this.playerHealthtext = this.add.text(16, 50, 'Health+: 100', { fontSize: '26px', fill: '#000',fontStyle: 'bold' }).setScrollFactor(0);
         this.isHit = false;
         // this.physics.add.overlap(this.player, this.enemy.bullets, this.PlayerHit,null,this);
         // this.physics.add.overlap(this.player.bullets, this.enemy, this.enemyHit,null,this);
@@ -256,9 +259,11 @@ export default class GameScene extends Phaser.Scene {
         this.input.keyboard.on('keydown-ESC', () => {
             this.scene.start("menuScene");
         });
-        this.add.text(this.scale.width - 100, 20, "Back",{
+        this.backButton = this.add.text(this.scale.width - 100, 20, "Back",{
             fontSize: '24px',
             backgroundColor: '#000',
+            padding: { x: 8, y: 4 },
+            color: '#fff'
         }).setInteractive().setScrollFactor(0).on('pointerdown', () => {
             this.scene.start("menuScene");});
         //sounds
@@ -268,10 +273,130 @@ export default class GameScene extends Phaser.Scene {
             gameOver: this.sound.add("gameOverSound"),
             hit: this.sound.add("hitSound")
         };
+        
+        this.gamecontainer.add([this.player,...this.platforms.getChildren(),...this.ground.getChildren(),this.enemy,this.boss])
+        
+        // Create rotation message for mobile
+        // Create black overlay for portrait mode
+        this.blackOverlay = this.add.rectangle(width / 2, height / 2, width * 2, height * 2, 0x000000, 1)
+            .setScrollFactor(0).setDepth(999).setOrigin(0.5);
+        this.blackOverlay.setVisible(false);
+        
+        // Create rotation message for portrait mode
+        this.rotationMessage = this.add.text(width / 2, height / 2, 'Please rotate your device\nto landscape mode', {
+            fontSize: '48px',
+            fill: '#fff',
+            align: 'center',
+            padding: { x: 20, y: 20 },
+            fontStyle: 'bold'
+        }).setOrigin(0.5).setScrollFactor(0).setDepth(1000);
+        this.rotationMessage.setVisible(false);
+        
+        this.scale.on('resize', this.resize,this)
+        this.time.delayedCall(50, () => {
+            this.resize({width, height})
+        })
+        this.setupCamera();
+        this.lastOrientation = width > height;
     }
-        createPlatforms() { 
+    resize(gameSize){
+        const w = gameSize?.width || this.scale.width;
+        const h = gameSize?.height || this.scale.height;
+        
+        // Set physics world bounds to accommodate floor position
+        if(this.sys.game.device.os.android || this.sys.game.device.os.iOS){
+            
+        
+        this.physics.world.setBounds(0, 0, 3000, h + 150);
+        this.cameras.main.setBounds(0, 0, 3000, h + 150); 
+
+        this.createPlatforms(h);
+
+        
+        // Floor repositioning - keep at bottom of screen/world
+        if(this.floor){
+            const nw = 3000;
+            const nh = 25;
+            // Position floor at the very bottom of the game world
+            const floorYPosition = h + 165; // Place well below viewport
+            this.floor
+                .setDisplaySize(nw, nh)
+                .setOrigin(0.5, 1)
+                .setPosition(nw/2, floorYPosition)
+                .refreshBody();
+            const body = this.floor.body;
+            if(body && body.setSize){
+                body.setSize(nw, nh);
+                body.setOffset(0, 0);
+                body.updateFromGameObject();
+            }
+        }
+        
+        // Player repositioning - position relative to floor
+        if(this.player){
+            this.player.setPosition(w / 2, h + 50); // Position player above floor
+        }
+        
+        // Enemy repositioning - position on platform or relative to floor
+        if(this.enemy && this.platforms){
+            let platform = this.platforms.getChildren()[2];
+            if(platform){
+                this.enemy.setPosition(platform.x, platform.y - 100);
+            } else {
+                this.enemy.setPosition(w / 2 + 300, h + 50);
+            }
+        }
+        
+        // Boss repositioning
+        if(this.boss){
+            this.boss.setPosition(2800, h - 100);
+        }
+        this.physics.add.collider(this.player,this.platforms);
+        this.physics.add.collider(this.enemy,this.platforms);
+        this.physics.add.collider(this.boss, this.platforms);  
+        
+        // UI Text repositioning (set scroll factor to 0 so they stay on screen)
+        if(this.scoreText){
+            this.scoreText.setPosition(w-900, h-440).setScrollFactor(0);
+        }
+        if(this.playerHealthtext){
+            this.playerHealthtext.setPosition(w-900, h-380).setScrollFactor(0);
+        }
+        if(this.ammoText){
+            this.ammoText.setPosition(w-900, h-330).setScrollFactor(0);
+        }
+        if(this.powertext){
+            this.powertext.setPosition(w-900, h-300).setScrollFactor(0);
+        }
+        
+        // Back button repositioning
+        if(this.backButton){
+            this.backButton.setPosition(w + 150 , h-440);
+        }
+        
+        // Check orientation on mobile
+        if(this.sys.game.device.os.android || this.sys.game.device.os.iOS){
+            const isLandscape = w > h;
+            if(this.lastOrientation == isLandscape)return;
+            this.lastOrientation = isLandscape;    
+    
+            this.blackOverlay
+                .setPosition(w / 2, h / 2)
+                .setDisplaySize(w * 2, h * 2)
+                .setVisible(true);
+
+            this.rotationMessage
+                .setPosition(w / 2, h / 2)
+                .setVisible(true);
+            this.scene.restart();
+        }
+    
+}
+    }
+        createPlatforms(wh) { 
         let x=0;
-        let y=500;
+        let y=wh ;
+        //if(this.platforms)this.platforms.clear(true,true);
         this.platforms = this.physics.add.staticGroup();
         while(x<3000){
             const platformwidth = Phaser.Math.Between(120,220);
@@ -279,9 +404,13 @@ export default class GameScene extends Phaser.Scene {
             x+=gap;
                 // Slight height variation (like Mario stairs)
             y += Phaser.Math.Between(-60, 60);
-            y = Phaser.Math.Clamp(y, 380, 480);
-            const platform = this.platforms.create(x, y, 'platform').setDisplaySize(100, 10).setOrigin(0.5,0.5);
-            platform.displayWidth = platformwidth;
+            if(this.sys.game.device.os.android || this.sys.game.device.os.iOS){
+                y = Phaser.Math.Clamp(y, wh * 0.5, wh * 67);
+            }
+            else{
+                y = Phaser.Math.Clamp(y, wh * 0.65, wh * 0.77);
+            } // Adjusted range to appear higher above ground
+            const platform = this.platforms.create(x, y, 'platform').setDisplaySize(platformwidth, 10).setOrigin(0.5,0.3);
             platform.refreshBody();
             x += platformwidth;
         }
@@ -305,12 +434,30 @@ export default class GameScene extends Phaser.Scene {
             const w = this.scale.width;
             this.joypointer = null;
             //joystick base
-            this.joybase = this.add.circle(80, h - 80, 40, 0x888888, 0.5).setScrollFactor(0).setInteractive();
-            this.joystick = this.add.circle(80, h - 80, 20, 0xcccccc, 0.8).setScrollFactor(0).setInteractive();
-            this.upbuttozone = this.add.zone(w - 160, h - 80, 80, 80).setScrollFactor(0).setInteractive().setOrigin(0.5);
-            const upButton = this.add.image(this.upbuttozone.x, this.upbuttozone.y+10, "up").setInteractive().setScrollFactor(0).setScale(.1).setDepth(1001);
-            this.shootbuttonzone = this.add.zone(w - 80, h - 80, 80, 80).setScrollFactor(0).setInteractive().setOrigin(0.5);
-            const shootButton = this.add.image(this.shootbuttonzone.x, this.shootbuttonzone.y+10, "shoot").setInteractive().setScrollFactor(0).setScale(.1).setDepth(1001);
+            const joyBaseRadius = Math.max(30, h * 0.01);
+            const joyKnobRadius = Math.max(15,h* 0.01)
+            const joyBaseX = w * 0.15 ;
+            const joyBaseY = h * 0.8;
+            this.joybase = this.add.circle(joyBaseX, joyBaseY, joyBaseRadius, 0x888888, 0.5).setScrollFactor(0).setInteractive();
+            this.joystick = this.add.circle(joyBaseX, joyBaseY, joyKnobRadius, 0xcccccc, 0.8).setScrollFactor(0);
+            this.joyMaxDist = joyBaseRadius;
+            // Store for resize handler
+            this.joyBaseRadius = joyBaseRadius;
+            this.joyKnobRadius = joyKnobRadius;
+            this.joyBaseX = joyBaseX;
+            this.joyBaseY = joyBaseY;
+
+            const upSize = Math.max(50, w* 0.08)
+            const upX = w + 220;
+            const upY = h - 90;
+            this.upbuttozone = this.add.zone(upX, upY, upSize, upSize).setScrollFactor(0).setInteractive().setOrigin(0.5);
+            const upButton = this.add.image(this.upbuttozone.x, this.upbuttozone.y+10, "up").setInteractive().setScrollFactor(0).setScale(upSize/500).setDepth(1001);
+            
+            const shootSize = Math.max(50, w*0.08)
+            const shootX = w + 150;
+            const shootY = h - 60;
+            this.shootbuttonzone = this.add.zone(shootX, shootY, shootSize, shootSize).setScrollFactor(0).setInteractive().setOrigin(0.5);
+            const shootButton = this.add.image(this.shootbuttonzone.x, this.shootbuttonzone.y+10, "shoot").setInteractive().setScrollFactor(0).setScale(shootSize / 500).setDepth(1001);
             //joystick input
             this.input.on("pointerdown", (pointer) => {
                 if (pointer.x < w / 2) {
@@ -319,11 +466,16 @@ export default class GameScene extends Phaser.Scene {
             this.input.on("pointermove", (pointer) => {
                 if (this.joypointer === pointer) {
                     const dx = pointer.x - this.joybase.x;
-                    this.joystick.x = this.joybase.x + Phaser.Math.Clamp(dx, -40, 40);
-                    if (dx < -15) {
+                    const dy = pointer.y - this.joybase.y;
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+                    const angle = Math.atan2(dy,dx);
+                    const clampedDist = Math.min(dist, this.joyMaxDist)
+                    this.joystick.x = this.joybase.x + Math.cos(angle) * clampedDist;
+                    this.joystick.y = this.joybase.y + Math.sin(angle) * clampedDist;
+                    if (dx < -joyBaseRadius * 0.4) {
                         this.leftpress = true;
                         this.rightpress = false;
-                    } else if (dx >15) {
+                    } else if (dx > joyBaseRadius * 0.4) {
                         this.leftpress = false;
                         this.rightpress = true;
                     } else {
@@ -361,8 +513,11 @@ export default class GameScene extends Phaser.Scene {
             this.scale.on('resize', (gameSize) => {
                 const w = gameSize.width;
                 const h = gameSize.height;
-                this.joybase.setPosition(80, h - 80);
-                this.joystick.setPosition(80, h - 80);
+                // Update joystick positions with new screen dimensions
+                const newJoyBaseX = w * 0.15;
+                const newJoyBaseY = h * 0.8;
+                this.joybase.setPosition(newJoyBaseX, newJoyBaseY);
+                this.joystick.setPosition(newJoyBaseX, newJoyBaseY);
                 this.upbuttozone.setPosition(w - 160, h - 80);
                 upButton.setPosition(w - 160, h - 80);
                 this.shootbuttonzone.setPosition(w - 80, h - 80);
@@ -541,10 +696,14 @@ export default class GameScene extends Phaser.Scene {
             bullet.body.setSize(10,10);
             bullet.body.setAllowGravity(false);
             bullet.setVelocityX(500 * (this.player.flipX ? -1 : 1));
-            bullet.rotation = Phaser.Math.Angle.Between(bullet.x, bullet.y, this.input.activePointer.worldX, this.input.activePointer.worldY);
+            
             //destroy bullet after 3 seconds to prevent memory leaks
-            this.time.delayedCall(3000, () => {
-                bullet.disableBody(true,true);
+            if(bullet.timer){
+                bullet.timer.remove(false);
+            }
+            bullet.timer = this.time.delayedCall(3000, () => {
+                if(bullet.active){
+                    bullet.disableBody(true,true);}
             });
         }
         firebullet(enemy,player,group){

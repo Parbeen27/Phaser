@@ -1,44 +1,64 @@
 export default class MenuScene extends Phaser.Scene {
     constructor() {
         super('menuScene');
+        this.cards = [];
     }
     create() {
-        this.add.rectangle(400, 300, 800, 600, 0x0f172a);
-        this.add.text(400,80,"Game Hub",{
+        const width = this.scale.width;
+        const height = this.scale.height;
+        this.bg = this.add.rectangle(0, 0, width, height, 0x0f172a).setOrigin(0,0);
+        this.title = this.add.text(width / 2, height * 0.1, "Game Hub", {
             fontSize: '48px',
             color: '#ffffff',
             fontStyle: 'bold',
         }).setOrigin(0.5);
-        window.addEventListener('resize', () => {
-            setTimeout(() => {
-                this.scale.refresh();
-            },200);
-        });
         const game = [
-            { key: 'PlatformGame', text: 'Platform Runner', scene: 'gameScene'},
-            { key: 'SpaceBattle' , text: 'Space Battle'   , scene: 'SpaceBattleScene'}
+            { key: 'PlatformGame', text: 'Platform Runner', scene: 'gameScene' },
+            { key: 'SpaceBattle', text: 'Space Battle', scene: 'SpaceBattleScene' }
         ];
-        let startx = 250;
-        let starty = 200;
-        let spacingx = 300;
+        this.createCards(game);
+        this.input.keyboard.on('keydown-F', () => {
+            if (this.scale.isFullscreen) {
+                this.scale.stopFullscreen();
+            } else {
+                this.scale.startFullscreen();
+            }
+        });
+        this.scale.on('resize', this.resize, this);
+        this.resize({ width, height})
+    }
+    createCards(game){
+        const width = this.scale.width;
+        const height = this.scale.height;
+        this.cards.forEach(cardobj => {
+            cardobj.card.destroy();
+            cardobj.image.destroy();
+            cardobj.text.destroy();
+        })
+        this.cards=[];
+
+        let startx = width * 0.3;
+        let starty = height * 0.4;
+        let spacingx = width * 0.4;
         const cardWidth = 260;
         const cardHeight = 180;
+
         game.forEach((g, index) => {
             const x = startx + index * spacingx;
             const y = starty;
-            const card = this.add.rectangle(x-100, y-10, cardWidth, cardHeight, 0x000000, 0.5).setStrokeStyle(2, 0xffffff).setOrigin(0.5);
-            const image = this.add.image(x-100, y-10, g.key);
+            const card = this.add.rectangle(0, 0, cardWidth, cardHeight, 0x000000, 0.5).setStrokeStyle(2, 0xffffff).setOrigin(0.5);
+            const image = this.add.image(0, 0, g.key);
             const maxWidth = 220;
             const scale = Math.min(maxWidth / image.width, 1);
             image.setScale(scale);
-            const text = this.add.text(x-100, y + 110, g.text, {
+            const text = this.add.text(0, 0, g.text, {
                 fontSize: '24px',
                 color: '#ffffff',
                 fontStyle: 'bold',
             }).setOrigin(0.5);
             // Make card interactive
             card.setInteractive({ useHandCursor: true });
-    
+
             // Add hover effect and click handler
             card.on('pointerover', () => {
                 this.tweens.add({
@@ -63,13 +83,36 @@ export default class MenuScene extends Phaser.Scene {
             card.on('pointerdown', () => {
                 this.scene.start(g.scene);
             });
+            this.cards.push({ card, image, text});
         });
-        this.input.keyboard.on('keydown-F', () => {
-            if (this.scale.isFullscreen) {
-                this.scale.stopFullscreen();
-            } else {
-                this.scale.startFullscreen();
-            }
-        });
+    }
+    resize(gameSize) {
+        const { width, height } = gameSize;
+        //background
+        this.bg.setSize(width, height);
+        this.title.setPosition(width / 2, height * 0.1)
+        this.bg.setPosition(0,0);
+
+        //card repostion
+        const spacingx = 20
+        const cardWidth = 260
+        const maxCardsPerrow = Math.floor(width / (cardWidth + spacingx))
+        const cardsperrow = Math.min(maxCardsPerrow, this.cards.length)
+        const totalrowwidth = cardsperrow * cardWidth + (cardsperrow - 1) * spacingx
+        const startx = (width - totalrowwidth)/2 + cardWidth / 2;
+        const starty = height * 0.4;
+        this.cards.forEach((cardobj, index) => {
+            const row = Math.floor(index / cardsperrow);
+            const col = index % cardsperrow;
+
+            const x = startx + col * (cardWidth + spacingx)
+            const y = starty + row * (cardWidth * 0.75)
+
+            cardobj.card.setPosition(x, y)
+            cardobj.image.setPosition(x, y)
+            cardobj.text.setOrigin(0.5)
+            const imageHeigh = cardobj.image.displayHeight;
+            cardobj.text.setPosition(x, y + imageHeigh /3 + 10)
+        })
     }
 }

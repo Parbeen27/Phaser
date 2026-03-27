@@ -19,18 +19,23 @@ export default class GameScene extends Phaser.Scene{
         this.lastFired = 0
         this.score = 0
         this.isHit = false
+        this.moverPointer = null
     }
     preload(){
         this.load.pack("game","assets/SpaceBattle/Assets.json")
     }
 
     create(){
+        const width = this.scale.width
+        const height = this.scale.height
         //background && worldbounds
-        this.bg = this.add.tileSprite(0,0,800,600,"background").setOrigin(0,0); 
-        this.physics.world.setBounds(0,0,this.sys.canvas.width, this.sys.canvas.height)
+        this.bg = this.add.tileSprite(0,0,width,height,"background").setOrigin(0,0); 
+        this.physics.world.setBounds(0,0,width, height)
+
+        this.isHit = false
 
         //player
-        this.player = this.physics.add.sprite(400,550,"player1").setScale(.2);
+        this.player = this.physics.add.sprite(width/2,height - 100,"player1").setScale(.2);
         this.player.setCollideWorldBounds(true);
         this.player.body.setAllowGravity(false);
         this.player.fireRate = 500;
@@ -39,27 +44,31 @@ export default class GameScene extends Phaser.Scene{
         this.player.health = 100
         this.player.shield = 3
         this.player.isInvincible = false
+        this.player.maxHealth = 100
         //player ammo
         this.player.ammo = 30
         this.player.maxAmmo = 50
 
         //======================enemy Waves======================================= 
         this.ENEMY_TYPES = {
-            normal: { speed: 100, hp: 1, atlas: 'enemy1', frame: 'restored_1.png', anim: 'enemy_move', canShoot: false },
-            mid: { speed: 70, hp: 3, atlas: 'enemy2', frame: 'restored_1.png', anim: 'enemy2_move', canShoot: true, fireRate: 1500 },
-            boss: { speed: 40, hp: 100, atlas: 'boss1', frame: 'restored_1.png', anim: 'boss_move', canShoot: true, fireRate: 400 }
+            normal: { speed: 100, hp: 1, atlas: 'enemy1', frame: 'restored_1.png', anim: 'enemy_move', canShoot: false , healthRestore: 10},
+            mid: { speed: 70, hp: 3, atlas: 'enemy2', frame: 'restored_1.png', anim: 'enemy2_move', canShoot: true, fireRate: 1500, healthRestore: 40 },
+            boss: { speed: 40, hp: 50, atlas: 'boss1', frame: 'restored_1.png', anim: 'boss_move', canShoot: true, fireRate: 400 ,healthRestore: 100}
         };
         this.enemies = this.physics.add.group({allowGravity : false});
 
         this.WAVES = [
-            [{ type: 'normal', count: 1, delay: 500}],
-            [{ type: 'mid', count: 1, delay: 500}],
-            [{ type: 'mid', count: 1, delay: 800},{ type: 'boss', count: 1, delay: 2000}]
+            [{ type: 'normal', count: 5, delay: 1000}],
+            [{ type: 'normal', count: 10, delay: 1000}],
+            [{ type: 'mid', count: 5, delay: 1500}],
+            [{ type: 'mid', count: 7, delay: 1800}],
+            [{ type: 'mid', count: 10, delay: 2000}],
+            [{ type: 'mid', count: 3, delay: 800},{ type: 'boss', count: 1, delay: 2000}]
         ];
         this.waveIndex = 0
         this.activeEnemies = 0
         this.isSpawning = false
-        this.waveText = this.add.text(400,300,'',{fontSize: '32px',fill: '#fff'}).setOrigin(0.5).setDepth(10)
+        this.waveText = this.add.text(width / 2,height / 2,'',{fontSize: '32px',fill: '#fff'}).setOrigin(0.5).setDepth(10).setWordWrapWidth(width * 0.8)
 
         this.startWave()
         this.events.on('shutdown', () => {
@@ -110,6 +119,15 @@ export default class GameScene extends Phaser.Scene{
         this.sfx = {
             BossTheme: this.sound.add('BossTheme')
         }
+        this.scale.on('resize', this.resize, this)
+    }
+    resize(gameSize){
+        const {w,h} = gameSize
+        //player
+        this.player.setPosition(w/2,h-100)
+        this.shootButton.setPosition(w*0.85,h*0.9)
+        this.waveText.setPosition(w/2,h/2) 
+        this.waveText.setWordWrapWidth(w * 0.8)
     }
     update(time,delta){
         if(this.isTouchDevice){
@@ -161,17 +179,17 @@ export default class GameScene extends Phaser.Scene{
         bullet.enableBody(true,this.player.x,this.player.y,true,true);
         bullet.setScale(.06)
         bullet.body.setSize(10,10)
-        bullet.setVelocityY(-400);
+        bullet.setVelocityY(-500);
         bullet.setAngle(-90)
-        bullet.setCollideWorldBounds(true)
-        bullet.body.onWorldBounds = true
-        this.physics.world.on('worldbounds', (body) => {
-            body.gameObject.disableBody(true,true)
-        })
+        bullet.setDepth(5)
+
         bullet.play('player_shoot')
-        
-        this.time.delayedCall(3000, () => {
-            bullet.disableBody(true,true);
+        if(bullet.timer){
+            bullet.timer.remove(false);
+        }
+        bullet.timer = this.time.delayedCall(3000, () => {
+            if(bullet.active){
+                bullet.disableBody(true,true);}
         });
     }
 
@@ -250,6 +268,7 @@ export default class GameScene extends Phaser.Scene{
         } 
         
         enemy.health = config.hp * difficultMultiplier
+        enemy.healthRestore = config.healthRestore
         enemy.play(config.anim)
         enemy.scorevalue = 10
         this.activeEnemies++
@@ -307,16 +326,28 @@ export default class GameScene extends Phaser.Scene{
         explosion.once('animationcomplete',() => {
             explosion.destroy()
         })
+        //stop events
         if(enemy.shootEvent)enemy.shootEvent.remove();
         if(enemy.attackloop)enemy.attackloop.remove();
         if(enemy.burstEvent)enemy.burstEvent.remove();
+        //enemy destroy
         if(enemy.active){
             enemy.destroy()
         } 
+        //restore health
+        if(this.player && enemy.healthRestore){
+            this.player.health = Math.min(this.player.maxHealth,this.player.health + enemy.healthRestore)
+            this.playerHealth.setText('Health: '+ this.player.health)
+        }
+        //drop items
         if(Phaser.Math.Between(0,100) < 50){
             this.dropItem(enemy.x,enemy.y)
         }
-        if(enemy.isBoss){this.dropItem(enemy.x,enemy.y)}
+        if(enemy.isBoss){
+            this.dropItem(enemy.x,enemy.y)
+            this.scene.start('winScene')
+            return;
+        }
         this.activeEnemies = Math.max(0, this.activeEnemies - 1);
     
         console.log('Remaining:',this.activeEnemies, 'spawning: ',this.isSpawning)
@@ -336,7 +367,7 @@ export default class GameScene extends Phaser.Scene{
                 } else{
                     this.startWave();
                 }
-            })
+            })        
         }
     }
     hitenemy(enemy){
@@ -390,8 +421,7 @@ export default class GameScene extends Phaser.Scene{
         item.destroy()
     }
     hitplayer(player,bullet){
-        if(player.isInvincible)return;
-        if(this.isHit)return
+        if(this.isHit || player.isInvincible) return
         this.isHit = true
         this.cameras.main.shake(150,0.02)
         bullet.destroy();
@@ -416,8 +446,9 @@ export default class GameScene extends Phaser.Scene{
         }
     }
     playerhit(){
-        if(this.isHit)return;
+        if(this.isHit || this.player.isInvincible) return;
         this.isHit = true
+        this.player.isInvincible = true
         this.cameras.main.shake(150,0.02)
         this.player.health -= 10
         this.playerHealth.setText('Health: ' + this.player.health)
@@ -425,6 +456,7 @@ export default class GameScene extends Phaser.Scene{
         this.time.delayedCall(100,()=>{
             this.player.clearTint()
             this.isHit = false
+            this.player.isInvincible = false
         })
         if(this.player.health <= 0){
             this.player.play('explode')
@@ -438,7 +470,7 @@ export default class GameScene extends Phaser.Scene{
             }
         }
         this.scene.stop('SpaceBattleScene')
-        this.scene.start("gameOverScene")
+        this.scene.start("GameOver")
     }
     addText(){
         this.scoreText = this.add.text(600, 40, 'Score: 0', {fontSize: '25px', fill: '#e0d2d2'}).setScrollFactor(0)
@@ -454,19 +486,31 @@ export default class GameScene extends Phaser.Scene{
         this.shootButtonPress = false;
         this.input.on('pointerdown',(pointer) => {
             if(this.shootButton && this.shootButton.getBounds().contains(pointer.x,pointer.y))return;
+            this.moverPointer = pointer
             this.targetX = pointer.x
             this.targetY = pointer.y
             this.isMovin = true
     })
         this.input.on('pointermove',(pointer) => {
-            if(pointer.isDown){
+            if(this.moverPointer && pointer.id === this.moverPointer.id){
                 this.targetX = pointer.x
                 this.targetY = pointer.y
         }
     })
         this.input.on('pointerup',() => {
-            this.isMovin = false
+            if(this.moverPointer && pointer.id === this.moverPointer.id){
+                this.isMovin = false
+                this.moverPointer = null
+            }
+            
     }) 
+        this.input.on('pointerout', (pointer) => {
+            if(this.moverPointer && pointer.id === this.moverPointer.id){
+                this.moverPointer = null
+                this.isMovin = false
+            }
+        })
+
     const W = this.cameras.main.width
     const H = this.cameras.main.height
     this.shootButton = this.add.image(W * 0.85, H * 0.85, 'shoot').setScale(0.3).setInteractive().setAlpha(0.5).setScrollFactor(0).setDepth(100);
@@ -529,6 +573,10 @@ export default class GameScene extends Phaser.Scene{
     mobilemovement(){
         if(!this.player)return;
         let targetAngle = 0
+        if (this.movePointer) {
+            this.targetX = this.movePointer.x;
+            this.targetY = this.movePointer.y;
+        }
         if(this.isMovin){
             const dx = this.targetX - this.player.x
             const dy = this.targetY - this.player.y
@@ -540,16 +588,19 @@ export default class GameScene extends Phaser.Scene{
         }else{
             this.player.setVelocity(0,0)
         }
-        if (this.isMovin){
+        const body = this.player.body
+        console.log(this.player.body.velocity.x, this.player.body.velocity.y);
+        const speedCheck = Math.abs(body.velocity.x) + Math.abs(body.velocity.y);
+        if (speedCheck > 5){
             if(this.player.anims.currentAnim.key !== 'player_fly'){
-                this.player.play('player_fly')
+                this.player.play('player_fly')}
                 this.player.scaleY = Phaser.Math.Linear(this.player.scaleY, 0.4, 0.1);
-            }
+            
         }else{
             if(this.player.anims.currentAnim.key !== 'player_idle'){
-                this.player.play('player_idle')
+                this.player.play('player_idle')}
                 this.player.setScale(0.2,0.2)
-            }
+            
         }
         this.player.angle = Phaser.Math.Linear(this.player.angle, targetAngle,0.1)
     }
