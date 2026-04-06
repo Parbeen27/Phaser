@@ -473,10 +473,17 @@ export default class GameScene extends Phaser.Scene{
         this.scene.start("GameOver")
     }
     addText(){
-        this.scoreText = this.add.text(600, 40, 'Score: 0', {fontSize: '25px', fill: '#e0d2d2'}).setScrollFactor(0)
+        this.scoreText = this.add.text(this.scale.width - 130, 50, 'Score:0', {fontSize: '25px', fill: '#e0d2d2'}).setScrollFactor(0)
         this.playerHealth = this.add.text(0,10,'Health: 100',{fontSize: '25px',fill: '#f2e4e4'}).setScrollFactor(0)
         this.ammoText = this.add.text(10,40, 'Ammo: 30',{fontSize: '20px',fill: '#fff'})
         this.shieldText = this.add.text(10,60, 'Shield: 3',{fontSize: '20px',fill: '#fff'})
+        this.backButton = this.add.text(this.scale.width - 100, 20, "Back",{
+            fontSize: '24px',
+            backgroundColor: '#000',
+            padding: { x: 8, y: 4 },
+            color: '#fff'
+        }).setInteractive().setScrollFactor(0).on('pointerdown', () => {
+            this.scene.start("menuScene");});
     }
 
     createcontrols(){

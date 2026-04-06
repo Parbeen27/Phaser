@@ -298,6 +298,16 @@ export default class GameScene extends Phaser.Scene {
         })
         this.setupCamera();
         this.lastOrientation = width > height;
+        
+        // Set initial orientation state
+        if(this.sys.game.device.os.android || this.sys.game.device.os.iOS){
+            if(!this.lastOrientation){
+                // Initial portrait mode
+                this.blackOverlay.setVisible(true);
+                this.rotationMessage.setVisible(true);
+                this.scene.pause();
+            }
+        }
     }
     resize(gameSize){
         const w = gameSize?.width || this.scale.width;
@@ -377,18 +387,25 @@ export default class GameScene extends Phaser.Scene {
         // Check orientation on mobile
         if(this.sys.game.device.os.android || this.sys.game.device.os.iOS){
             const isLandscape = w > h;
-            if(this.lastOrientation == isLandscape)return;
-            this.lastOrientation = isLandscape;    
-    
-            this.blackOverlay
-                .setPosition(w / 2, h / 2)
-                .setDisplaySize(w * 2, h * 2)
-                .setVisible(true);
-
-            this.rotationMessage
-                .setPosition(w / 2, h / 2)
-                .setVisible(true);
-            this.scene.restart();
+            if(this.lastOrientation != isLandscape){
+                this.lastOrientation = isLandscape;
+                if(isLandscape){
+                    // Switched to landscape: hide overlay, restart scene
+                    this.blackOverlay.setVisible(false);
+                    this.rotationMessage.setVisible(false);
+                    this.scene.restart();
+                } else {
+                    // Switched to portrait: show overlay, pause scene
+                    this.blackOverlay
+                        .setPosition(w / 2, h / 2)
+                        .setDisplaySize(w * 3, h * 3)
+                        .setVisible(true);
+                    this.rotationMessage
+                        .setPosition(w / 2, h / 2)
+                        .setVisible(true);
+                    this.scene.pause();
+                }
+            }
         }
     
 }

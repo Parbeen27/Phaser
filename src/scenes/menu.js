@@ -89,7 +89,7 @@ export default class MenuScene extends Phaser.Scene {
     resize(gameSize) {
         const { width, height } = gameSize;
         //background
-        this.bg.setSize(width, height);
+        //this.bg.setSize(width, height);
         this.title.setPosition(width / 2, height * 0.1)
         this.bg.setPosition(0,0);
 
